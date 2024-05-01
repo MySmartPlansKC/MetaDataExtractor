@@ -1,5 +1,6 @@
 # MetadataExtractor/get_image_metadata.py
 
+import argparse
 import os
 from exifread import process_file
 from datetime import datetime
@@ -11,8 +12,8 @@ script_dir = os.path.dirname(os.path.realpath(__file__))
 
 # Global Configuration
 METADATA_HEADER = "MySmartPlans MetaData Tracker\n\n"
-INPUT_DIRECTORY = os.path.join(script_dir, r"..\testFiles")  # TESTING
-OUTPUT_DIRECTORY = os.path.join(script_dir, "PHILDemo")  # TESTING
+INPUT_DIRECTORY_GLOBAL = os.path.join(script_dir, r"..\testFiles")  # TESTING
+OUTPUT_DIRECTORY_GLOBAL = os.path.join(script_dir, r"..\output")  # TESTING
 # INPUT_DIRECTORY = os.path.join(script_dir, r"L:\Fresno\Procore Files\Photos\Processed\2024-0422\Unclassified")
 # OUTPUT_DIRECTORY = os.path.join(script_dir, r"L:\Fresno\Procore Files\Photos\Processed\2024-0422\metadata")
 
@@ -332,6 +333,15 @@ def overlay_text(
 
 
 def main():
+    parser = argparse.ArgumentParser(description="Process images and extract metadata")
+    parser.add_argument("-i", "--input_dir", required=False, help="Input directory")
+    parser.add_argument("-o", "--output_dir", required=False, help="Output directory")
+    args = parser.parse_args()
+
+    # Prioritize command-line arguments if provided, otherwise use globals
+    INPUT_DIRECTORY = args.input_dir or INPUT_DIRECTORY_GLOBAL
+    OUTPUT_DIRECTORY = args.output_dir or OUTPUT_DIRECTORY_GLOBAL
+
     # Create directory if not exist
     os.makedirs(OUTPUT_DIRECTORY, exist_ok=True)
 
@@ -341,7 +351,7 @@ def main():
         for filename in files:
             filepath = os.path.join(root, filename)
 
-            print(f"Processing file: {filepath}")
+            print(f"Processing file: {filename}")
 
             if filepath.lower().endswith(
                 (".jpg", ".jpeg", ".png")
