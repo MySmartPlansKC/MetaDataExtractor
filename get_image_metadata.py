@@ -32,7 +32,9 @@ NO_METADATA_MESSAGE = "No Metadata Available\n"
 
 def parse_image_date(date_str):
     try:
-        return datetime.strptime(date_str, '%Y:%m:%d %H:%M:%S').strftime('%Y-%m-%d %H:%M:%S')
+        return datetime.strptime(date_str, "%Y:%m:%d %H:%M:%S").strftime(
+            "%Y-%m-%d %H:%M:%S"
+        )
     except ValueError:
         return date_str
 
@@ -47,19 +49,47 @@ def format_filesize_kb(filesize_bytes):
 
 def get_image_metadata(image_path):
     try:
-        with open(image_path, 'rb') as file:
+        with open(image_path, "rb") as file:
             tags = process_file(file)
         metadata = {
-            "GPS GPSLatitude": [x for x in tags.get('GPS GPSLatitude').values] if tags.get('GPS GPSLatitude') else None,
-            "GPS GPSLongitude": [x for x in tags.get('GPS GPSLongitude').values] if tags.get(
-                'GPS GPSLongitude') else None,
-            "Origin Date": parse_image_date(str(tags.get('EXIF DateTimeOriginal'))) if tags.get(
-                'EXIF DateTimeOriginal') else None,
-            "Offset Time": tags.get("EXIF OffsetTime") if tags.get("EXIF OffsetTime") else None,
-            "Make": str(tags.get("Image Make").printable).strip() if tags.get("Image Make") else None,
-            "Model": str(tags.get("Image Model").printable).strip() if tags.get("Image Model") else None,
-            "Image Width": tags.get("EXIF ExifImageWidth") if tags.get("EXIF ExifImageWidth") else None,
-            "Image Height": tags.get("EXIF ExifImageLength") if tags.get("EXIF ExifImageLength") else None,
+            "GPS GPSLatitude": (
+                [x for x in tags.get("GPS GPSLatitude").values]
+                if tags.get("GPS GPSLatitude")
+                else None
+            ),
+            "GPS GPSLongitude": (
+                [x for x in tags.get("GPS GPSLongitude").values]
+                if tags.get("GPS GPSLongitude")
+                else None
+            ),
+            "Origin Date": (
+                parse_image_date(str(tags.get("EXIF DateTimeOriginal")))
+                if tags.get("EXIF DateTimeOriginal")
+                else None
+            ),
+            "Offset Time": (
+                tags.get("EXIF OffsetTime") if tags.get("EXIF OffsetTime") else None
+            ),
+            "Make": (
+                str(tags.get("Image Make").printable).strip()
+                if tags.get("Image Make")
+                else None
+            ),
+            "Model": (
+                str(tags.get("Image Model").printable).strip()
+                if tags.get("Image Model")
+                else None
+            ),
+            "Image Width": (
+                tags.get("EXIF ExifImageWidth")
+                if tags.get("EXIF ExifImageWidth")
+                else None
+            ),
+            "Image Height": (
+                tags.get("EXIF ExifImageLength")
+                if tags.get("EXIF ExifImageLength")
+                else None
+            ),
             "Megapixels": tags.get("Megapixels") if tags.get("Megapixels") else None,
         }
         return metadata
@@ -102,18 +132,30 @@ def write_metadata(metadata, output_path):
                 f.write(f"Make: {file_info['metadata'].get('Make')}\n")
                 f.write(f"Model: {file_info['metadata'].get('Model')}\n")
 
-                lat_ref = file_info['metadata'].get("GPS LatitudeRef") or "N"
-                latitude = convert_gps_to_dms(file_info['metadata'].get("GPS GPSLatitude"), lat_ref)
+                lat_ref = file_info["metadata"].get("GPS LatitudeRef") or "N"
+                latitude = convert_gps_to_dms(
+                    file_info["metadata"].get("GPS GPSLatitude"), lat_ref
+                )
                 f.write(f"Latitude: {latitude}\n")
 
-                lon_ref = file_info['metadata'].get("GPS LongitudeRef") or "E"
-                longitude = convert_gps_to_dms(file_info['metadata'].get("GPS Longitude"), lon_ref)
+                lon_ref = file_info["metadata"].get("GPS LongitudeRef") or "E"
+                longitude = convert_gps_to_dms(
+                    file_info["metadata"].get("GPS Longitude"), lon_ref
+                )
                 f.write(f"Longitude: {longitude}\n")
 
-                f.write(f"Origin Date: {file_info['metadata'].get('EXIF DateTimeOriginal')}\n")
-                f.write(f"Image Width: {file_info['metadata'].get('EXIF ExifImageWidth')}\n")
-                f.write(f"Image Height: {file_info['metadata'].get('EXIF ExifImageLength')}\n")
-                f.write(f"Offset Time: {file_info['metadata'].get('EXIF OffsetTime')}\n")
+                f.write(
+                    f"Origin Date: {file_info['metadata'].get('EXIF DateTimeOriginal')}\n"
+                )
+                f.write(
+                    f"Image Width: {file_info['metadata'].get('EXIF ExifImageWidth')}\n"
+                )
+                f.write(
+                    f"Image Height: {file_info['metadata'].get('EXIF ExifImageLength')}\n"
+                )
+                f.write(
+                    f"Offset Time: {file_info['metadata'].get('EXIF OffsetTime')}\n"
+                )
                 f.write(f"Megapixels: {file_info['metadata'].get('Megapixels')}\n")
                 f.write("\n")
 
@@ -149,13 +191,13 @@ def write_metadata(metadata, output_path):
             sheet.cell(row, 2).value = file_info["file_path"]
 
             # Convert 'Origin Date'
-            origin_date = file_info['metadata'].get("Origin Date")
+            origin_date = file_info["metadata"].get("Origin Date")
             if origin_date:
                 formatted_date = parse_image_date(origin_date)
                 sheet.cell(row, 3).value = formatted_date
 
             # Convert 'Offset Time'
-            offset_time = file_info['metadata'].get("Offset Time")
+            offset_time = file_info["metadata"].get("Offset Time")
             if isinstance(offset_time, str):
                 sheet.cell(row, 4).value = offset_time
             else:
@@ -164,24 +206,26 @@ def write_metadata(metadata, output_path):
             # Handle potential None or invalid characters
             make = file_info["metadata"].get("Make")
             if make:
-                make = make.encode('ascii', errors='ignore').decode()
+                make = make.encode("ascii", errors="ignore").decode()
                 sheet.cell(row, 5).value = make
             # Same for Model
             model = file_info["metadata"].get("Model")
             if model:
-                model = model.encode('ascii', errors='ignore').decode()
+                model = model.encode("ascii", errors="ignore").decode()
                 sheet.cell(row, 6).value = model
             sheet.cell(row, 7).value = format_filesize_kb(file_info["file_size"])
             sheet.cell(row, 8).value = file_info["file_type"]
-            sheet.cell(row, 9).value = str(file_info['metadata'].get("GPS GPSLatitude"))
-            sheet.cell(row, 10).value = str(file_info['metadata'].get("GPS GPSLongitude"))
-            image_width = file_info['metadata'].get("Image Width")
+            sheet.cell(row, 9).value = str(file_info["metadata"].get("GPS GPSLatitude"))
+            sheet.cell(row, 10).value = str(
+                file_info["metadata"].get("GPS GPSLongitude")
+            )
+            image_width = file_info["metadata"].get("Image Width")
             if image_width:
                 sheet.cell(row, 11).value = int(image_width.printable)
-            image_height = file_info['metadata'].get("Image Height")
+            image_height = file_info["metadata"].get("Image Height")
             if image_height:
                 sheet.cell(row, 12).value = int(image_height.printable)
-            megapixels = file_info['metadata'].get("Megapixels")
+            megapixels = file_info["metadata"].get("Megapixels")
             if megapixels:
                 sheet.cell(row, 13).value = float(megapixels.printable)
 
@@ -196,12 +240,13 @@ def write_metadata(metadata, output_path):
         raise ValueError("Unsupported format")
 
 
+# noinspection PyUnresolvedReferences
 def open_image_without_orientation(image_path):
     img = Image.open(image_path)
     exif = img.getexif()
     orientation = 1
     for orientation in ExifTags.TAGS.keys():
-        if ExifTags.TAGS[orientation] == 'Orientation':
+        if ExifTags.TAGS[orientation] == "Orientation":
             break
 
     if exif[orientation] == 2:  # Horizontal flip
@@ -222,17 +267,26 @@ def open_image_without_orientation(image_path):
     return img
 
 
-def overlay_text(image_path, text, position, output_directory, color=(0, 0, 0), background_color=(255, 255, 255, 128)):
+def overlay_text(
+    image_path,
+    text,
+    position,
+    output_directory,
+    color=(0, 0, 0),
+    background_color=(255, 255, 255, 128),
+):
     # img = Image.open(image_path).convert('RGBA')
-    img = open_image_without_orientation(image_path).convert('RGBA')
+    img = open_image_without_orientation(image_path).convert("RGBA")
     # Create a new image for semi-transparent overlay
-    overlay = Image.new('RGBA', img.size, (255, 255, 255, 0))
+    overlay = Image.new("RGBA", img.size, (255, 255, 255, 0))
     overlay_draw = ImageDraw.Draw(overlay)
 
     width, height = img.size
 
     # Dynamic Font Scaling
-    font_size = max(12, int(height * 0.02))  # Base size of 12, scales with 2% of image height
+    font_size = max(
+        12, int(height * 0.02)
+    )  # Base size of 12, scales with 2% of image height
     font = ImageFont.truetype("arial.ttf", font_size)
 
     # Dynamic Padding
@@ -247,18 +301,33 @@ def overlay_text(image_path, text, position, output_directory, color=(0, 0, 0), 
     text = METADATA_HEADER + text
 
     text_width, text_height = overlay_draw.textbbox((0, 0), text, font=font)[2:]
-    overlay_draw.rectangle(((position[0] - padding_left, position[1] - padding_top),
-                            (position[0] + text_width + padding_right, position[1] + text_height + padding_bottom)),
-                           fill=background_color)
+    overlay_draw.rectangle(
+        (
+            (position[0] - padding_left, position[1] - padding_top),
+            (
+                position[0] + text_width + padding_right,
+                position[1] + text_height + padding_bottom,
+            ),
+        ),
+        fill=background_color,
+    )
     overlay_draw.text((position[0], position[1]), text, fill=color, font=font)
 
-    cropped_overlay = overlay.crop((position[0] - padding_left,
-                                    position[1] - padding_top,
-                                    position[0] + text_width + padding_right,
-                                    position[1] + text_height + padding_bottom))
+    cropped_overlay = overlay.crop(
+        (
+            position[0] - padding_left,
+            position[1] - padding_top,
+            position[0] + text_width + padding_right,
+            position[1] + text_height + padding_bottom,
+        )
+    )
 
     # Paste only the cropped area onto the original image
-    img.paste(cropped_overlay, (position[0] - padding_left, position[1] - padding_top), mask=cropped_overlay)
+    img.paste(
+        cropped_overlay,
+        (position[0] - padding_left, position[1] - padding_top),
+        mask=cropped_overlay,
+    )
 
     # Save to output directory
     filename = os.path.basename(image_path)
@@ -269,8 +338,12 @@ def overlay_text(image_path, text, position, output_directory, color=(0, 0, 0), 
 
 def convert_gps_to_dms(coordinates, reference):
     degrees = sum(float(x.numerator) / float(x.denominator) for x in coordinates[:1])
-    minutes = sum(float(x.numerator) / float(x.denominator) / 60 for x in coordinates[1:2])
-    seconds = sum(float(x.numerator) / float(x.denominator) / 3600 for x in coordinates[2:3])
+    minutes = sum(
+        float(x.numerator) / float(x.denominator) / 60 for x in coordinates[1:2]
+    )
+    seconds = sum(
+        float(x.numerator) / float(x.denominator) / 3600 for x in coordinates[2:3]
+    )
     return f"{degrees:.0f}° {minutes:.0f}' {seconds:.2f}\" {reference}"
 
 
@@ -279,9 +352,7 @@ def main():
     os.makedirs(OUTPUT_DIRECTORY, exist_ok=True)
 
     # Centralized metadata storage
-    directory_metadata = {
-        "files": []  # List for storing file-level metadata
-    }
+    directory_metadata = {"files": []}  # List for storing file-level metadata
 
     for root, dirs, files in os.walk(INPUT_DIRECTORY):
         for filename in files:
@@ -289,7 +360,9 @@ def main():
 
             print(f"Processing file: {filepath}")
 
-            if filepath.lower().endswith((".jpg", ".jpeg", ".png")) and not filepath.endswith(("_MD.png", "_MD.txt")):
+            if filepath.lower().endswith(
+                (".jpg", ".jpeg", ".png")
+            ) and not filepath.endswith(("_MD.png", "_MD.txt")):
                 metadata = get_image_metadata(filepath)
 
                 # raw_metadata = get_image_metadata(filepath)
@@ -305,13 +378,15 @@ def main():
                 file_type = os.path.splitext(filename)[1]  # Get extension
 
                 # Add file info to the metadata
-                directory_metadata["files"].append({
-                    "filename": filename,
-                    "metadata": metadata,
-                    "file_size": file_size,
-                    "file_type": file_type,
-                    "file_path": filepath
-                })
+                directory_metadata["files"].append(
+                    {
+                        "filename": filename,
+                        "metadata": metadata,
+                        "file_size": file_size,
+                        "file_type": file_type,
+                        "file_path": filepath,
+                    }
+                )
 
                 # if CREATE_LOG_FILE:
                 #     with open(LOG_FILE_PATH, "a") as log_file:
@@ -346,11 +421,18 @@ def main():
                 overlay_text(filepath, overlay_text_content, (10, 10), OUTPUT_DIRECTORY)
 
             elif filepath.lower().endswith(".png"):
-                overlay_text(filepath, "PNG File: Metadata Not Processed", (10, 10), OUTPUT_DIRECTORY)
+                overlay_text(
+                    filepath,
+                    "PNG File: Metadata Not Processed",
+                    (10, 10),
+                    OUTPUT_DIRECTORY,
+                )
 
         # After processing all files, write the directory metadata:
         working_directory_name = os.path.basename(INPUT_DIRECTORY)
-        directory_metadata_path = os.path.join(OUTPUT_DIRECTORY, working_directory_name + "_MD." + METADATA_FORMAT)
+        directory_metadata_path = os.path.join(
+            OUTPUT_DIRECTORY, working_directory_name + "_MD." + METADATA_FORMAT
+        )
         if CREATE_METADATA_FILE:
             write_metadata(directory_metadata, directory_metadata_path)
 
