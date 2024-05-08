@@ -1,21 +1,33 @@
-# MetadataExtractor/get_image_metadata.py
+# MetadataExtractor/image_metadata_extractor.py
 
-import argparse
-import os
-from exifread import process_file
-from datetime import datetime
+import logging
 import openpyxl
-from PIL import Image, ImageDraw, ImageFont, ExifTags
+import os
+import shutil
+import sys
+import time
+from datetime import datetime
+from exifread import process_file
 from fractions import Fraction as Ratio
+from PIL import Image, ImageDraw, ImageFont, ExifTags
+
+# Versioning
+__version__ = "1.0.0"
 
 script_dir = os.path.dirname(os.path.realpath(__file__))
 
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s - %(levelname)s - %(message)s",
+    datefmt="%Y-%m-%d %H:%M:%S",
+    handlers=[
+        logging.FileHandler("metadata_extraction.log"),
+        logging.StreamHandler(),
+    ],
+)
+
 # Global Configuration
-METADATA_HEADER = "MySmartPlans MetaData Tracker\n\n"
-INPUT_DIRECTORY_GLOBAL = os.path.join(script_dir, r"..\testFiles")  # TESTING
-OUTPUT_DIRECTORY_GLOBAL = os.path.join(script_dir, r"..\output")  # TESTING
-# INPUT_DIRECTORY = os.path.join(script_dir, r"L:\Fresno\Procore Files\Photos\Processed\2024-0422\Unclassified")
-# OUTPUT_DIRECTORY = os.path.join(script_dir, r"L:\Fresno\Procore Files\Photos\Processed\2024-0422\metadata")
+METADATA_HEADER = "MySmartPlans MetaData Tracker v{__version__}\n\n"
 
 # File tracking
 METADATA_FORMAT = "xlsx"  # Choose (txt or xlsx)
@@ -29,6 +41,15 @@ PADDING_TOP_FACTOR = 0.02
 PADDING_BOTTOM_FACTOR = 0.01
 
 NO_METADATA_MESSAGE = "No Metadata Available\n"
+
+
+def get_base_path():
+    if getattr(sys, "frozen", False):
+        # If the application is frozen using PyInstaller
+        return os.path.dirname(sys.executable)
+    else:
+        # Normal execution (e.g., script or interactive)
+        return os.path.dirname(os.path.abspath(__file__))
 
 
 def parse_image_date(date_str):
@@ -72,38 +93,38 @@ def get_image_metadata(image_path):
         with open(image_path, "rb") as file:
             tags = process_file(file)
         metadata = {
-            "GPS Latitude": tags.get("GPS GPSLatitude") or None,
-            "GPS Longitude": tags.get("GPS GPSLongitude") or None,
+            "GPS Latitude": tags.get("GPS GPSLatitude") or "",
+            "GPS Longitude": tags.get("GPS GPSLongitude") or "",
             "Origin Date": (
                 parse_image_date(str(tags.get("EXIF DateTimeOriginal")))
                 if tags.get("EXIF DateTimeOriginal")
-                else None
+                else ""
             ),
             "Offset Time": (
-                tags.get("EXIF OffsetTime") if tags.get("EXIF OffsetTime") else None
+                tags.get("EXIF OffsetTime") if tags.get("EXIF OffsetTime") else ""
             ),
-            "Orientation": tags.get("Image Orientation") or None,
+            "Orientation": tags.get("Image Orientation") or "",
             "Make": (
                 str(tags.get("Image Make").printable).strip()
                 if tags.get("Image Make")
-                else None
+                else ""
             ),
             "Model": (
                 str(tags.get("Image Model").printable).strip()
                 if tags.get("Image Model")
-                else None
+                else ""
             ),
             "Image Width": (
                 tags.get("EXIF ExifImageWidth")
                 if tags.get("EXIF ExifImageWidth")
-                else None
+                else ""
             ),
             "Image Height": (
                 tags.get("EXIF ExifImageLength")
                 if tags.get("EXIF ExifImageLength")
-                else None
+                else ""
             ),
-            "Megapixels": tags.get("Megapixels") if tags.get("Megapixels") else None,
+            "Megapixels": tags.get("Megapixels") if tags.get("Megapixels") else "",
         }
         return metadata, tags
     except Exception as e:
@@ -332,100 +353,162 @@ def overlay_text(
     img.save(output_path)
 
 
-def main():
-    parser = argparse.ArgumentParser(description="Process images and extract metadata")
-    parser.add_argument("-i", "--input_dir", required=False, help="Input directory")
-    parser.add_argument("-o", "--output_dir", required=False, help="Output directory")
-    args = parser.parse_args()
+def check_and_clear_directory(directory):
+    if os.path.exists(directory):
+        if os.listdir(directory):  # Check if the directory is not empty
+            response = input(
+                f"Directory {directory} is not empty. Delete all contents? (y/n): "
+            )
+            if response.lower() == "y":
+                # Clear the directory
+                for filename in os.listdir(directory):
+                    file_path = os.path.join(directory, filename)
+                    if os.path.isfile(file_path) or os.path.islink(file_path):
+                        os.unlink(file_path)
+                    elif os.path.isdir(file_path):
+                        shutil.rmtree(file_path)
+                logging.info(f"All contents of {directory} have been deleted.")
+            else:
+                logging.error("Operation aborted by the user.")
+                return False
+    else:
+        os.makedirs(directory, exist_ok=True)
+    return True
 
-    # Prioritize command-line arguments if provided, otherwise use globals
-    INPUT_DIRECTORY = args.input_dir or INPUT_DIRECTORY_GLOBAL
-    OUTPUT_DIRECTORY = args.output_dir or OUTPUT_DIRECTORY_GLOBAL
+
+def main():
+    base_path = get_base_path()
+    # input_directory = os.path.join(base_path, "IMAGES_IN")
+    input_directory = r"..\testFiles"
+    output_directory = os.path.join(base_path, "IMAGES_OUT")
+    error_directory = os.path.join(base_path, "IMAGES_ERROR")
+
+    logging.info(f"Starting Metadata Extractor version {__version__}")
+    time.sleep(1)
+
+    # Check and possibly clear the output directory
+    if not check_and_clear_directory(output_directory):
+        return
+    time.sleep(1)
+
+    # Check and possibly clear the error directory
+    if not check_and_clear_directory(error_directory):
+        return
+    time.sleep(1)
+
+    if not os.path.exists(input_directory):
+        logging.error(f"Input directory does not exist: {input_directory}")
+        return
+
+        # Check if there are any JPEG images in the directory
+    if not any(
+        file.lower().endswith((".jpg", ".jpeg")) for file in os.listdir(input_directory)
+    ):
+        logging.error("No JPEG images found in the input directory.")
+        return
 
     # Create directory if not exist
-    os.makedirs(OUTPUT_DIRECTORY, exist_ok=True)
+    os.makedirs(output_directory, exist_ok=True)
+    os.makedirs(error_directory, exist_ok=True)
+
+    has_errors = False
 
     directory_metadata = {"files": []}  # List for storing file-level metadata
 
-    for root, dirs, files in os.walk(INPUT_DIRECTORY):
+    for root, dirs, files in os.walk(input_directory):
         for filename in files:
             filepath = os.path.join(root, filename)
+            try:
+                logging.info(f"Processing file: {filename}")
 
-            print(f"Processing file: {filename}")
+                if filepath.lower().endswith(
+                    (".jpg", ".jpeg", ".png")
+                ) and not filepath.endswith(("_MD.png", "_MD.txt")):
+                    formatted_metadata, raw_metadata = get_image_metadata(filepath)
 
-            if filepath.lower().endswith(
-                (".jpg", ".jpeg", ".png")
-            ) and not filepath.endswith(("_MD.png", "_MD.txt")):
-                formatted_metadata, raw_metadata = get_image_metadata(filepath)
+                    if WRITE_RAW_METADATA:  # Conditionally write raw data
+                        output_filename = (
+                            os.path.splitext(filename)[0] + "_metadata.txt"
+                        )
+                        output_path = os.path.join(output_directory, output_filename)
+                        write_raw_metadata(raw_metadata, output_path)
 
-                if WRITE_RAW_METADATA:  # Conditionally write raw data
-                    output_filename = os.path.splitext(filename)[0] + "_metadata.txt"
-                    output_path = os.path.join(OUTPUT_DIRECTORY, output_filename)
-                    write_raw_metadata(raw_metadata, output_path)
+                    # Get file information
+                    file_stats = os.stat(filepath)
+                    file_size = file_stats.st_size
+                    file_type = os.path.splitext(filename)[1]  # Get extension
 
-                # Get file information
-                file_stats = os.stat(filepath)
-                file_size = file_stats.st_size
-                file_type = os.path.splitext(filename)[1]  # Get extension
+                    # Add file info to the metadata
+                    directory_metadata["files"].append(
+                        {
+                            "filename": filename,
+                            "metadata": formatted_metadata,
+                            "file_size": file_size,
+                            "file_type": file_type,
+                            "file_path": filepath,
+                        }
+                    )
 
-                # Add file info to the metadata
-                directory_metadata["files"].append(
-                    {
-                        "filename": filename,
-                        "metadata": formatted_metadata,
-                        "file_size": file_size,
-                        "file_type": file_type,
-                        "file_path": filepath,
-                    }
-                )
+                    overlay_text_content = f"Filename: {os.path.basename(filepath)}\n"
 
-                overlay_text_content = f"Filename: {os.path.basename(filepath)}\n"
+                    if all(value is None for value in formatted_metadata.values()):
+                        overlay_text_content += "No Metadata Available\n"
+                    else:
+                        for key, value in formatted_metadata.items():
+                            if key == "GPS Latitude" and value:
+                                lat_ref = (
+                                    formatted_metadata.get("GPS GPSLatitudeRef") or "N"
+                                )
+                                latitude = convert_gps_to_dms(value, lat_ref)
+                                overlay_text_content += f"Latitude: {latitude}\n"
+                            elif key == "GPS Longitude" and value:
+                                lon_ref = (
+                                    formatted_metadata.get("GPS GPSLongitudeRef") or "E"
+                                )
+                                longitude = convert_gps_to_dms(value, lon_ref)
+                                overlay_text_content += f"Longitude: {longitude}\n"
+                            elif key == "Origin Date" and value:
+                                overlay_text_content += f"Date/Time: {value}\n"
+                            elif key == "Offset Time" and value:
+                                overlay_text_content += f"Offset Time: {value}\n"
+                            elif key == "Orientation" and value:
+                                overlay_text_content += f"Orientation: {value}\n"
+                            elif key == "Make" and value:
+                                overlay_text_content += f"Make: {value}\n"
+                            elif key == "Model" and value:
+                                overlay_text_content += f"Model: {value}\n"
+                            elif key == "Image Width" and value:
+                                image_width = value
+                            elif key == "Image Height" and value and image_width:
+                                overlay_text_content += (
+                                    f"Image Size: {image_width} x {value}\n"
+                                )
+                                image_width = None
+                            elif key == "Megapixel" and value:
+                                overlay_text_content += f"Megapixel: {value}\n"
 
-                if all(value is None for value in formatted_metadata.values()):
-                    overlay_text_content += "No Metadata Available\n"
-                else:
-                    for key, value in formatted_metadata.items():
-                        if key == "GPS Latitude" and value:
-                            lat_ref = (
-                                formatted_metadata.get("GPS GPSLatitudeRef") or "N"
-                            )
-                            latitude = convert_gps_to_dms(value, lat_ref)
-                            overlay_text_content += f"Latitude: {latitude}\n"
-                        elif key == "GPS Longitude" and value:
-                            lon_ref = (
-                                formatted_metadata.get("GPS GPSLongitudeRef") or "E"
-                            )
-                            longitude = convert_gps_to_dms(value, lon_ref)
-                            overlay_text_content += f"Longitude: {longitude}\n"
-                        elif key == "Origin Date" and value:
-                            overlay_text_content += f"Date/Time: {value}\n"
-                        elif key == "Offset Time" and value:
-                            overlay_text_content += f"Offset Time: {value}\n"
-                        elif key == "Orientation" and value:
-                            overlay_text_content += f"Orientation: {value}\n"
-                        elif key == "Make" and value:
-                            overlay_text_content += f"Make: {value}\n"
-                        elif key == "Model" and value:
-                            overlay_text_content += f"Model: {value}\n"
-                        elif key == "Image Width" and value:
-                            image_width = value
-                        elif key == "Image Height" and value and image_width:
-                            overlay_text_content += (
-                                f"Image Size: {image_width} x {value}\n"
-                            )
-                            image_width = None
-                        elif key == "Megapixel" and value:
-                            overlay_text_content += f"Megapixel: {value}\n"
+                    logging.info(f"Processed file: {filename}")
+                    overlay_text(
+                        filepath, overlay_text_content, (10, 10), output_directory
+                    )
 
-                overlay_text(filepath, overlay_text_content, (10, 10), OUTPUT_DIRECTORY)
+            except Exception as e:
+                error_file_path = os.path.join(error_directory, filename)
+                os.rename(filepath, error_file_path)
+                logging.error(f"Failed to process {filename}. Error: {e}")
+                has_errors = True
 
-        # Create directory metadata:
-        working_directory_name = os.path.basename(INPUT_DIRECTORY)
-        directory_metadata_path = os.path.join(
-            OUTPUT_DIRECTORY, working_directory_name + "_MD." + METADATA_FORMAT
-        )
+        # Handle metadata file creation
         if CREATE_METADATA_FILE:
+            working_directory_name = os.path.basename(input_directory)
+            directory_metadata_path = os.path.join(
+                output_directory, working_directory_name + "_MD." + METADATA_FORMAT
+            )
             write_metadata(directory_metadata, directory_metadata_path)
+    if has_errors:
+        logging.error(
+            f"Processing completed with errors. Please check: {error_directory}"
+        )
 
 
 if __name__ == "__main__":
