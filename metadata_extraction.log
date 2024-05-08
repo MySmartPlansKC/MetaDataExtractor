@@ -1,0 +1,178 @@
+2024-05-08 14:41:43 - INFO - v{__version__} - Starting Metadata Extractor version 1.0.0
+2024-05-08 14:44:22 - INFO - v{__version__} - Starting Metadata Extractor version 1.0.0
+2024-05-08 14:44:22 - ERROR - v{__version__} - Input directory does not exist: E:\Python\MetaDataExtractor\IMAGES_IN
+2024-05-08 14:48:30 - INFO - Starting Metadata Extractor version 1.0.0
+2024-05-08 14:48:30 - ERROR - Input directory does not exist: E:\Python\MetaDataExtractor\IMAGES_IN
+2024-05-08 14:50:01 - INFO - Starting Metadata Extractor version 1.0.0
+2024-05-08 14:50:01 - INFO - Processing file: england-london-bridge.jpg
+2024-05-08 14:50:01 - INFO - Processed file: england-london-bridge.jpg
+2024-05-08 14:50:01 - INFO - Processing file: Splash Screen_MySmartPlans.jpg
+2024-05-08 14:50:01 - INFO - Processed file: Splash Screen_MySmartPlans.jpg
+2024-05-08 14:50:01 - INFO - Processing file: VISN-Map.png
+2024-05-08 14:50:01 - WARNING - PNG file does not have exif data.
+2024-05-08 14:50:01 - INFO - Processed file: VISN-Map.png
+2024-05-08 14:50:01 - INFO - Processing file: WireFrameBlue.png
+2024-05-08 14:50:01 - INFO - Processed file: WireFrameBlue.png
+2024-05-08 14:50:02 - INFO - Processing file: 20240125_092856.jpg
+2024-05-08 14:50:02 - INFO - Processed file: 20240125_092856.jpg
+2024-05-08 14:50:04 - INFO - Processing file: 20240125_092859.jpg
+2024-05-08 14:50:04 - INFO - Processed file: 20240125_092859.jpg
+2024-05-08 14:50:06 - INFO - Processing file: 20240125_092903.jpg
+2024-05-08 14:50:06 - INFO - Processed file: 20240125_092903.jpg
+2024-05-08 14:50:08 - INFO - Processing file: 20240125_093002.jpg
+2024-05-08 14:50:08 - INFO - Processed file: 20240125_093002.jpg
+2024-05-08 14:50:12 - INFO - Processing file: 20240125_094226.jpg
+2024-05-08 14:50:12 - INFO - Processed file: 20240125_094226.jpg
+2024-05-08 14:50:14 - INFO - Processing file: 20240125_094237.jpg
+2024-05-08 14:50:14 - INFO - Processed file: 20240125_094237.jpg
+2024-05-08 14:51:55 - INFO - Starting Metadata Extractor version 1.0.0
+2024-05-08 14:51:55 - INFO - Processing file: england-london-bridge.jpg
+2024-05-08 14:51:55 - INFO - Processed file: england-london-bridge.jpg
+2024-05-08 14:51:56 - INFO - Processing file: Splash Screen_MySmartPlans.jpg
+2024-05-08 14:51:56 - INFO - Processed file: Splash Screen_MySmartPlans.jpg
+2024-05-08 14:51:56 - INFO - Processing file: VISN-Map.png
+2024-05-08 14:51:56 - WARNING - PNG file does not have exif data.
+2024-05-08 14:51:56 - INFO - Processed file: VISN-Map.png
+2024-05-08 14:51:56 - INFO - Processing file: WireFrameBlue.png
+2024-05-08 14:51:56 - INFO - Processed file: WireFrameBlue.png
+2024-05-08 14:52:00 - INFO - Starting Metadata Extractor version 1.0.0
+2024-05-08 14:52:00 - INFO - Processing file: england-london-bridge.jpg
+2024-05-08 14:52:00 - INFO - Processed file: england-london-bridge.jpg
+2024-05-08 14:52:00 - INFO - Processing file: Splash Screen_MySmartPlans.jpg
+2024-05-08 14:52:00 - INFO - Processed file: Splash Screen_MySmartPlans.jpg
+2024-05-08 14:52:00 - INFO - Processing file: VISN-Map.png
+2024-05-08 14:52:00 - WARNING - PNG file does not have exif data.
+2024-05-08 14:52:00 - INFO - Processed file: VISN-Map.png
+2024-05-08 14:52:01 - INFO - Processing file: WireFrameBlue.png
+2024-05-08 14:52:01 - INFO - Processed file: WireFrameBlue.png
+2024-05-08 14:52:01 - INFO - Processing file: 20240125_092856.jpg
+2024-05-08 14:52:01 - INFO - Processed file: 20240125_092856.jpg
+2024-05-08 14:52:04 - INFO - Processing file: 20240125_092859.jpg
+2024-05-08 14:52:04 - INFO - Processed file: 20240125_092859.jpg
+2024-05-08 14:52:06 - INFO - Processing file: 20240125_092903.jpg
+2024-05-08 14:52:06 - INFO - Processed file: 20240125_092903.jpg
+2024-05-08 14:52:07 - INFO - Processing file: 20240125_093002.jpg
+2024-05-08 14:52:07 - INFO - Processed file: 20240125_093002.jpg
+2024-05-08 14:52:11 - INFO - Processing file: 20240125_094226.jpg
+2024-05-08 14:52:11 - INFO - Processed file: 20240125_094226.jpg
+2024-05-08 14:52:13 - INFO - Processing file: 20240125_094237.jpg
+2024-05-08 14:52:13 - INFO - Processed file: 20240125_094237.jpg
+2024-05-08 15:03:17 - INFO - Starting Metadata Extractor version 1.0.0
+2024-05-08 15:03:17 - INFO - Processing file: england-london-bridge.jpg
+2024-05-08 15:03:17 - INFO - Processed file: england-london-bridge.jpg
+2024-05-08 15:03:18 - INFO - Processing file: Splash Screen_MySmartPlans.jpg
+2024-05-08 15:03:18 - INFO - Processed file: Splash Screen_MySmartPlans.jpg
+2024-05-08 15:03:18 - INFO - Processing file: VISN-Map.png
+2024-05-08 15:03:18 - WARNING - PNG file does not have exif data.
+2024-05-08 15:03:18 - INFO - Processed file: VISN-Map.png
+2024-05-08 15:03:18 - INFO - Processing file: WireFrameBlue.png
+2024-05-08 15:03:18 - INFO - Processed file: WireFrameBlue.png
+2024-05-08 15:04:05 - INFO - Starting Metadata Extractor version 1.0.0
+2024-05-08 15:04:05 - INFO - Processing file: england-london-bridge.jpg
+2024-05-08 15:04:05 - INFO - Processed file: england-london-bridge.jpg
+2024-05-08 15:04:06 - INFO - Processing file: Splash Screen_MySmartPlans.jpg
+2024-05-08 15:04:06 - INFO - Processed file: Splash Screen_MySmartPlans.jpg
+2024-05-08 15:04:06 - INFO - Processing file: VISN-Map.png
+2024-05-08 15:04:06 - WARNING - PNG file does not have exif data.
+2024-05-08 15:04:06 - INFO - Processed file: VISN-Map.png
+2024-05-08 15:04:06 - INFO - Processing file: WireFrameBlue.png
+2024-05-08 15:04:06 - INFO - Processed file: WireFrameBlue.png
+2024-05-08 15:04:06 - INFO - Processing file: 20240125_092856.jpg
+2024-05-08 15:04:06 - INFO - Processed file: 20240125_092856.jpg
+2024-05-08 15:04:09 - INFO - Processing file: 20240125_092859.jpg
+2024-05-08 15:04:09 - INFO - Processed file: 20240125_092859.jpg
+2024-05-08 15:04:11 - INFO - Processing file: 20240125_092903.jpg
+2024-05-08 15:04:11 - INFO - Processed file: 20240125_092903.jpg
+2024-05-08 15:04:13 - INFO - Processing file: 20240125_093002.jpg
+2024-05-08 15:04:13 - INFO - Processed file: 20240125_093002.jpg
+2024-05-08 15:04:17 - INFO - Processing file: 20240125_094226.jpg
+2024-05-08 15:04:17 - INFO - Processed file: 20240125_094226.jpg
+2024-05-08 15:04:19 - INFO - Processing file: 20240125_094237.jpg
+2024-05-08 15:04:19 - INFO - Processed file: 20240125_094237.jpg
+2024-05-08 15:05:20 - INFO - Starting Metadata Extractor version 1.0.0
+2024-05-08 15:05:20 - INFO - Processing file: england-london-bridge.jpg
+2024-05-08 15:05:20 - INFO - Processed file: england-london-bridge.jpg
+2024-05-08 15:05:21 - INFO - Processing file: Splash Screen_MySmartPlans.jpg
+2024-05-08 15:05:21 - INFO - Processed file: Splash Screen_MySmartPlans.jpg
+2024-05-08 15:05:21 - INFO - Processing file: VISN-Map.png
+2024-05-08 15:05:21 - WARNING - PNG file does not have exif data.
+2024-05-08 15:05:21 - INFO - Processed file: VISN-Map.png
+2024-05-08 15:05:21 - INFO - Processing file: WireFrameBlue.png
+2024-05-08 15:05:21 - INFO - Processed file: WireFrameBlue.png
+2024-05-08 15:05:24 - INFO - Starting Metadata Extractor version 1.0.0
+2024-05-08 15:05:24 - INFO - Processing file: england-london-bridge.jpg
+2024-05-08 15:05:24 - INFO - Processed file: england-london-bridge.jpg
+2024-05-08 15:05:24 - INFO - Processing file: Splash Screen_MySmartPlans.jpg
+2024-05-08 15:05:24 - INFO - Processed file: Splash Screen_MySmartPlans.jpg
+2024-05-08 15:05:24 - INFO - Processing file: VISN-Map.png
+2024-05-08 15:05:24 - WARNING - PNG file does not have exif data.
+2024-05-08 15:05:24 - INFO - Processed file: VISN-Map.png
+2024-05-08 15:05:24 - INFO - Processing file: WireFrameBlue.png
+2024-05-08 15:05:24 - INFO - Processed file: WireFrameBlue.png
+2024-05-08 15:05:25 - INFO - Processing file: 20240125_092856.jpg
+2024-05-08 15:05:25 - INFO - Processed file: 20240125_092856.jpg
+2024-05-08 15:05:28 - INFO - Processing file: 20240125_092859.jpg
+2024-05-08 15:05:28 - INFO - Processed file: 20240125_092859.jpg
+2024-05-08 15:05:29 - INFO - Processing file: 20240125_092903.jpg
+2024-05-08 15:05:29 - INFO - Processed file: 20240125_092903.jpg
+2024-05-08 15:05:31 - INFO - Processing file: 20240125_093002.jpg
+2024-05-08 15:05:31 - INFO - Processed file: 20240125_093002.jpg
+2024-05-08 15:05:35 - INFO - Processing file: 20240125_094226.jpg
+2024-05-08 15:05:35 - INFO - Processed file: 20240125_094226.jpg
+2024-05-08 15:05:37 - INFO - Processing file: 20240125_094237.jpg
+2024-05-08 15:05:37 - INFO - Processed file: 20240125_094237.jpg
+2024-05-08 15:12:54 - INFO - Starting Metadata Extractor version 1.0.0
+2024-05-08 15:12:54 - INFO - Processing file: england-london-bridge.jpg
+2024-05-08 15:12:54 - INFO - Processed file: england-london-bridge.jpg
+2024-05-08 15:12:54 - INFO - Processing file: Splash Screen_MySmartPlans.jpg
+2024-05-08 15:12:54 - INFO - Processed file: Splash Screen_MySmartPlans.jpg
+2024-05-08 15:12:54 - INFO - Processing file: VISN-Map.png
+2024-05-08 15:12:54 - WARNING - PNG file does not have exif data.
+2024-05-08 15:12:54 - INFO - Processed file: VISN-Map.png
+2024-05-08 15:12:54 - INFO - Processing file: WireFrameBlue.png
+2024-05-08 15:12:54 - INFO - Processed file: WireFrameBlue.png
+2024-05-08 15:22:16 - INFO - Starting Metadata Extractor version 1.0.0
+2024-05-08 15:22:16 - INFO - Processing file: england-london-bridge.jpg
+2024-05-08 15:22:16 - INFO - Processed file: england-london-bridge.jpg
+2024-05-08 15:22:17 - INFO - Processing file: Splash Screen_MySmartPlans.jpg
+2024-05-08 15:22:17 - INFO - Processed file: Splash Screen_MySmartPlans.jpg
+2024-05-08 15:22:17 - INFO - Processing file: VISN-Map.png
+2024-05-08 15:22:17 - WARNING - PNG file does not have exif data.
+2024-05-08 15:22:17 - INFO - Processed file: VISN-Map.png
+2024-05-08 15:22:17 - INFO - Processing file: WireFrameBlue.png
+2024-05-08 15:22:17 - INFO - Processed file: WireFrameBlue.png
+2024-05-08 15:22:24 - INFO - Starting Metadata Extractor version 1.0.0
+2024-05-08 15:22:34 - INFO - All contents of E:\Python\MetaDataExtractor\IMAGES_OUT have been deleted.
+2024-05-08 15:22:34 - INFO - Processing file: england-london-bridge.jpg
+2024-05-08 15:22:34 - INFO - Processed file: england-london-bridge.jpg
+2024-05-08 15:22:35 - INFO - Processing file: Splash Screen_MySmartPlans.jpg
+2024-05-08 15:22:35 - INFO - Processed file: Splash Screen_MySmartPlans.jpg
+2024-05-08 15:22:35 - INFO - Processing file: VISN-Map.png
+2024-05-08 15:22:35 - WARNING - PNG file does not have exif data.
+2024-05-08 15:22:35 - INFO - Processed file: VISN-Map.png
+2024-05-08 15:22:35 - INFO - Processing file: WireFrameBlue.png
+2024-05-08 15:22:35 - INFO - Processed file: WireFrameBlue.png
+2024-05-08 15:22:58 - INFO - Starting Metadata Extractor version 1.0.0
+2024-05-08 15:23:01 - INFO - All contents of E:\Python\MetaDataExtractor\IMAGES_OUT have been deleted.
+2024-05-08 15:23:15 - INFO - All contents of E:\Python\MetaDataExtractor\IMAGES_ERROR have been deleted.
+2024-05-08 15:23:15 - INFO - Processing file: england-london-bridge.jpg
+2024-05-08 15:23:15 - INFO - Processed file: england-london-bridge.jpg
+2024-05-08 15:23:16 - INFO - Processing file: Splash Screen_MySmartPlans.jpg
+2024-05-08 15:23:16 - INFO - Processed file: Splash Screen_MySmartPlans.jpg
+2024-05-08 15:23:16 - INFO - Processing file: VISN-Map.png
+2024-05-08 15:23:16 - WARNING - PNG file does not have exif data.
+2024-05-08 15:23:16 - INFO - Processed file: VISN-Map.png
+2024-05-08 15:23:16 - INFO - Processing file: WireFrameBlue.png
+2024-05-08 15:23:16 - INFO - Processed file: WireFrameBlue.png
+2024-05-08 15:26:20 - INFO - Starting Metadata Extractor version 1.0.0
+2024-05-08 15:29:05 - INFO - Starting Metadata Extractor version 1.0.0
+2024-05-08 15:29:13 - INFO - All contents of E:\Python\MetaDataExtractor\IMAGES_OUT have been deleted.
+2024-05-08 15:29:15 - INFO - Processing file: england-london-bridge.jpg
+2024-05-08 15:29:15 - INFO - Processed file: england-london-bridge.jpg
+2024-05-08 15:29:15 - INFO - Processing file: Splash Screen_MySmartPlans.jpg
+2024-05-08 15:29:15 - INFO - Processed file: Splash Screen_MySmartPlans.jpg
+2024-05-08 15:29:15 - INFO - Processing file: VISN-Map.png
+2024-05-08 15:29:15 - WARNING - PNG file does not have exif data.
+2024-05-08 15:29:15 - INFO - Processed file: VISN-Map.png
+2024-05-08 15:29:15 - INFO - Processing file: WireFrameBlue.png
+2024-05-08 15:29:15 - INFO - Processed file: WireFrameBlue.png
