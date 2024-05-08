@@ -13,6 +13,7 @@ from PIL import Image, ImageDraw, ImageFont, ExifTags
 
 # Versioning
 __version__ = "1.0.0"
+# pyinstaller --onefile --icon=metadata.ico --name MetaDataApp-V1.0.0 image_metadata_extractor.py
 
 script_dir = os.path.dirname(os.path.realpath(__file__))
 
@@ -378,8 +379,8 @@ def check_and_clear_directory(directory):
 
 def main():
     base_path = get_base_path()
-    # input_directory = os.path.join(base_path, "IMAGES_IN")
-    input_directory = r"..\testFiles"
+    # input_directory = r"..\testFiles"
+    input_directory = os.path.join(base_path, "IMAGES_IN")
     output_directory = os.path.join(base_path, "IMAGES_OUT")
     error_directory = os.path.join(base_path, "IMAGES_ERROR")
 
