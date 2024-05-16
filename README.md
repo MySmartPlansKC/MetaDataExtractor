@@ -1,4 +1,4 @@
-# Metadata Extractor v1.0.0 User Manual
+# Metadata Extractor User Manual
 
 ## Introduction
 Metadata Extractor is a tool designed to extract and log metadata from JPEG images stored in a specified directory. This document provides detailed instructions on how to set up and use Metadata Extractor effectively.

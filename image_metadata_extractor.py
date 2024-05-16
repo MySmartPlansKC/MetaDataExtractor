@@ -12,8 +12,8 @@ from fractions import Fraction as Ratio
 from PIL import Image, ImageDraw, ImageFont, ExifTags
 
 # Versioning
-__version__ = "1.0.0"
-# pyinstaller --onefile --icon=metadata.ico --name MetaDataApp-V1.0.0 image_metadata_extractor.py
+__version__ = "1.0.1"
+# pyinstaller --onefile --icon=metadata.ico --name MetaDataApp-V1.0.1 image_metadata_extractor.py
 
 script_dir = os.path.dirname(os.path.realpath(__file__))
 
@@ -492,6 +492,9 @@ def main():
                     overlay_text(
                         filepath, overlay_text_content, (10, 10), output_directory
                     )
+
+                    # Remove the file from the input directory after processing
+                    os.remove(filepath)
 
             except Exception as e:
                 error_file_path = os.path.join(error_directory, filename)
