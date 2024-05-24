@@ -11,9 +11,12 @@ from exifread import process_file
 from fractions import Fraction as Ratio
 from PIL import Image, ImageDraw, ImageFont, ExifTags
 
+# Increase the pixel limit to 300 million pixels
+Image.MAX_IMAGE_PIXELS = 300000000
+
 # Versioning
-__version__ = "1.0.1"
-# pyinstaller --onefile --icon=metadata.ico --name MetaDataApp-V1.0.1 image_metadata_extractor.py
+__version__ = "1.1.0"
+# pyinstaller --onefile --icon=metadata.ico --name MetaData-V1.1.0 image_metadata_extractor.py
 
 script_dir = os.path.dirname(os.path.realpath(__file__))
 
@@ -28,7 +31,7 @@ logging.basicConfig(
 )
 
 # Global Configuration
-METADATA_HEADER = "MySmartPlans MetaData Tracker v{__version__}\n\n"
+METADATA_HEADER = f"MySmartPlans MetaData Tracker v{__version__}\n\n"
 
 # File tracking
 METADATA_FORMAT = "xlsx"  # Choose (txt or xlsx)
@@ -500,6 +503,9 @@ def main():
                 error_file_path = os.path.join(error_directory, filename)
                 os.rename(filepath, error_file_path)
                 logging.error(f"Failed to process {filename}. Error: {e}")
+                print(f"An error occurred: {e}")
+                print(f"Check the error output folder: {error_directory}")
+                input("Press Enter to acknowledge and continue...")
                 has_errors = True
 
         # Handle metadata file creation
