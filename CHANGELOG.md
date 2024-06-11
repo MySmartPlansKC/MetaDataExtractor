@@ -2,6 +2,18 @@
 
 # Changelog
 
+## [2.1.0] - 2024-06-11
+### Fixed
+- Adjusted GPS coordinates to properly display Degrees Minutes and Seconds
+
+---
+
+## [2.0.0] - 2024-05-24
+### Changed
+- Changed libraries for GPS data
+
+---
+
 ## [1.1.0] - 2024-05-24
 ### Added
 - More robust error handling and user input on error.

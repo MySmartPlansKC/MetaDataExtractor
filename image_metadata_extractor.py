@@ -15,8 +15,8 @@ from PIL import Image, ImageDraw, ImageFont, ExifTags
 Image.MAX_IMAGE_PIXELS = 300000000
 
 # Versioning
-__version__ = "1.1.0"
-# pyinstaller --onefile --icon=metadata.ico --name MetaData-V1.1.0 image_metadata_extractor.py
+__version__ = "2.1.1"
+# pyinstaller --onefile --icon=metadata.ico --name MetaData-V2.1.1 image_metadata_extractor.py
 
 script_dir = os.path.dirname(os.path.realpath(__file__))
 
@@ -45,6 +45,8 @@ PADDING_TOP_FACTOR = 0.02
 PADDING_BOTTOM_FACTOR = 0.01
 
 NO_METADATA_MESSAGE = "No Metadata Available\n"
+
+OVERLAY_POSITIONS = {1: "top-left", 2: "top-right", 3: "bottom-left", 4: "bottom-right"}
 
 
 def get_base_path():
@@ -89,7 +91,7 @@ def convert_gps_to_dms(coordinates, reference):
     minutes = calculate_dms(coordinates.values[1] if coordinates else None) / 60
     seconds = calculate_dms(coordinates.values[2] if coordinates else None) / 3600
 
-    return f"{degrees:.0f}° {minutes:.0f}' {seconds:.2f}\" {reference}"
+    return f"{degrees:.1f}° {minutes:.3f}' {seconds:.4f}\" {reference}"
 
 
 def get_image_metadata(image_path):
@@ -293,6 +295,7 @@ def overlay_text(
     text,
     position,
     output_directory,
+    overlay_position="top-left",
     color=(0, 0, 0),
     background_color=(255, 255, 255, 128),
 ):
@@ -322,31 +325,44 @@ def overlay_text(
     text = METADATA_HEADER + text
 
     text_width, text_height = overlay_draw.textbbox((0, 0), text, font=font)[2:]
+
+    if overlay_position == "top-left":
+        text_position = (position[0], position[1])
+    elif overlay_position == "top-right":
+        text_position = (width - text_width - padding_right, position[1])
+    elif overlay_position == "bottom-left":
+        text_position = (position[0], height - text_height - padding_bottom)
+    elif overlay_position == "bottom-right":
+        text_position = (
+            width - text_width - padding_right,
+            height - text_height - padding_bottom,
+        )
+
     overlay_draw.rectangle(
         (
-            (position[0] - padding_left, position[1] - padding_top),
+            (text_position[0] - padding_left, text_position[1] - padding_top),
             (
-                position[0] + text_width + padding_right,
-                position[1] + text_height + padding_bottom,
+                text_position[0] + text_width + padding_right,
+                text_position[1] + text_height + padding_bottom,
             ),
         ),
         fill=background_color,
     )
-    overlay_draw.text((position[0], position[1]), text, fill=color, font=font)
+    overlay_draw.text((text_position[0], text_position[1]), text, fill=color, font=font)
 
     cropped_overlay = overlay.crop(
         (
-            position[0] - padding_left,
-            position[1] - padding_top,
-            position[0] + text_width + padding_right,
-            position[1] + text_height + padding_bottom,
+            text_position[0] - padding_left,
+            text_position[1] - padding_top,
+            text_position[0] + text_width + padding_right,
+            text_position[1] + text_height + padding_bottom,
         )
     )
 
     # Paste only the cropped area onto the original image
     img.paste(
         cropped_overlay,
-        (position[0] - padding_left, position[1] - padding_top),
+        (text_position[0] - padding_left, text_position[1] - padding_top),
         mask=cropped_overlay,
     )
 
@@ -382,12 +398,30 @@ def check_and_clear_directory(directory):
 
 def main():
     base_path = get_base_path()
-    # input_directory = r"..\testFiles"
+
+    # input_directory = r"E:\Python\xPDFTestFiles\IMAGES_IN"
+    # output_directory = r"E:\Python\xPDFTestFiles\IMAGES_OUT"
+    # error_directory = r"E:\Python\xPDFTestFiles\IMAGES_ERROR"
+
     input_directory = os.path.join(base_path, "IMAGES_IN")
     output_directory = os.path.join(base_path, "IMAGES_OUT")
     error_directory = os.path.join(base_path, "IMAGES_ERROR")
 
+    # User selects the overlay position
+    print("Choose the orientation of the metadata overlay for this batch of files:")
+    print("1: Top Left (Default)")
+    print("2: Top Right")
+    print("3: Bottom Left")
+    print("4: Bottom Right")
+    overlay_choice = input(
+        "Enter your choice (1-4, or press Enter for default): "
+    ).strip()
+    if not overlay_choice:
+        overlay_choice = "1"
+    overlay_position = OVERLAY_POSITIONS.get(int(overlay_choice), "top-left")
+
     logging.info(f"Starting Metadata Extractor version {__version__}")
+    logging.info(f"Using overlay position {overlay_choice}")
     time.sleep(1)
 
     # Check and possibly clear the output directory
@@ -493,19 +527,28 @@ def main():
 
                     logging.info(f"Processed file: {filename}")
                     overlay_text(
-                        filepath, overlay_text_content, (10, 10), output_directory
+                        filepath,
+                        overlay_text_content,
+                        (10, 10),
+                        output_directory,
+                        overlay_position,
                     )
 
                     # Remove the file from the input directory after processing
-                    os.remove(filepath)
+                    # os.remove(filepath)
 
             except Exception as e:
                 error_file_path = os.path.join(error_directory, filename)
+
+                # For testing use copy to avoid deleting test files
                 os.rename(filepath, error_file_path)
+                # shutil.copy(filepath, error_file_path)
+
                 logging.error(f"Failed to process {filename}. Error: {e}")
                 print(f"An error occurred: {e}")
                 print(f"Check the error output folder: {error_directory}")
                 input("Press Enter to acknowledge and continue...")
+
                 has_errors = True
 
         # Handle metadata file creation
@@ -519,6 +562,9 @@ def main():
         logging.error(
             f"Processing completed with errors. Please check: {error_directory}"
         )
+
+    # Testing only
+    # input("Press Enter to close this window...")
 
 
 if __name__ == "__main__":
