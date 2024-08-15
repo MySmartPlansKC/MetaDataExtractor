@@ -2,6 +2,15 @@
 
 # Changelog
 
+## [2.2.0] - 2024-08-15
+### Added
+- Added sorting function to place files into folders classified by date.
+
+### Changed
+- Adjusted input options to include an option to delete the previous log file.
+
+---
+
 ## [2.1.0] - 2024-06-11
 ### Fixed
 - Adjusted GPS coordinates to properly display Degrees Minutes and Seconds

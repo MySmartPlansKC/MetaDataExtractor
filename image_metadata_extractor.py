@@ -3,6 +3,7 @@
 import logging
 import openpyxl
 import os
+import re
 import shutil
 import sys
 import time
@@ -15,20 +16,33 @@ from PIL import Image, ImageDraw, ImageFont, ExifTags
 Image.MAX_IMAGE_PIXELS = 300000000
 
 # Versioning
-__version__ = "2.1.1"
-# pyinstaller --onefile --icon=metadata.ico --name MetaData-V2.1.1 image_metadata_extractor.py
+__version__ = "2.2.0"
+# pyinstaller --onefile --icon=metadata.ico --name MetaData-V2.2.0 image_metadata_extractor.py
 
 script_dir = os.path.dirname(os.path.realpath(__file__))
 
-logging.basicConfig(
-    level=logging.INFO,
-    format="%(asctime)s - %(levelname)s - %(message)s",
-    datefmt="%Y-%m-%d %H:%M:%S",
-    handlers=[
-        logging.FileHandler("metadata_extraction.log"),
-        logging.StreamHandler(),
-    ],
-)
+
+def setup_logging():
+    log_file = "metadata_extraction.log"
+
+    if os.path.exists(log_file):
+        response = input(f"Log file '{log_file}' already exists. Delete it? (y/n): ")
+        if response.lower() == "y":
+            os.remove(log_file)
+            print(f"Log file '{log_file}' deleted.")
+        else:
+            print("Log file will be appended.")
+
+    logging.basicConfig(
+        level=logging.INFO,
+        format="%(asctime)s - %(levelname)s - %(message)s",
+        datefmt="%Y-%m-%d %H:%M:%S",
+        handlers=[
+            logging.FileHandler(log_file),
+            logging.StreamHandler(),
+        ],
+    )
+
 
 # Global Configuration
 METADATA_HEADER = f"MySmartPlans MetaData Tracker v{__version__}\n\n"
@@ -366,10 +380,23 @@ def overlay_text(
         mask=cropped_overlay,
     )
 
+    date_match = re.search(r"Date/Time: (\d{4}-\d{2}-\d{2})", text)
+    if date_match:
+        date_str = date_match.group(1)  # Extract the date string
+        date_obj = datetime.strptime(date_str, "%Y-%m-%d")  # Convert to datetime object
+        date_folder = date_obj.strftime("%m-%d-%Y")
+    else:
+        date_folder = datetime.now().strftime(
+            "%m-%d-%Y"
+        )  # Fallback to current date if not found
+
+    date_folder_path = os.path.join(output_directory, date_folder)
+    os.makedirs(date_folder_path, exist_ok=True)
+
     # Save to output directory
     filename = os.path.basename(image_path)
     new_name = os.path.splitext(filename)[0] + "_MD.png"
-    output_path = os.path.join(output_directory, new_name)
+    output_path = os.path.join(date_folder_path, new_name)
     img.save(output_path)
 
 
@@ -397,6 +424,8 @@ def check_and_clear_directory(directory):
 
 
 def main():
+    setup_logging()
+
     base_path = get_base_path()
 
     # input_directory = r"E:\Python\xPDFTestFiles\IMAGES_IN"
@@ -535,7 +564,7 @@ def main():
                     )
 
                     # Remove the file from the input directory after processing
-                    # os.remove(filepath)
+                    os.remove(filepath)
 
             except Exception as e:
                 error_file_path = os.path.join(error_directory, filename)
