@@ -2,6 +2,10 @@
 
 # Changelog
 
+## [2.3.0] - 2024-12-17
+### Added
+- Added support for HEIC files.
+
 ## [2.2.0] - 2024-08-15
 ### Added
 - Added sorting function to place files into folders classified by date.

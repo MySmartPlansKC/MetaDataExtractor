@@ -1,10 +1,11 @@
-Quick Start Guide for Metadata Extractor v1.0.0
+Quick Start Guide for Metadata Extractor v2.3.0
 
-1. Ensure that the IMAGES_IN directory is properly set up in the same directory as the executable and contains JPEG images.
-2. Run the MetadataExtractor executable.
-3. The program will check the IMAGES_OUT and IMAGES_ERROR directories and prompt to clear them if they are not empty.
-4. If the directories are cleared or already empty, the program will proceed to process the images.
-5. Results (extracted metadata and any errors) will be logged and saved in the IMAGES_OUT and IMAGES_ERROR directories respectively.
-6. Review the metadata_extraction.log file for detailed logs of the operation.
+1. Ensure that the IMAGES_IN directory is properly set up in the same directory as the executable
+2. Place your image files in the IMAGES_IN folder.
+3. Run the Metadata Extractor executable.
+4. The program will check the IMAGES_OUT and IMAGES_ERROR directories and prompt to clear them if they are not empty.
+5. If the directories are cleared or already empty, the program will proceed to process the images.
+6. Results (extracted metadata and any errors) will be logged and saved in the IMAGES_OUT and IMAGES_ERROR directories respectively.
+7. Review the metadata_extraction.log file for detailed logs of the operation.
 
 Note: Ensure that no other process is using the directories while the Metadata Extractor is running.

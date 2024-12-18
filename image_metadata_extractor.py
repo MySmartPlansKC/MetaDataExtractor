@@ -1,10 +1,13 @@
 # MetadataExtractor/image_metadata_extractor.py
 
+import json
 import logging
 import openpyxl
 import os
+import pillow_heif
 import re
 import shutil
+import subprocess
 import sys
 import time
 from datetime import datetime
@@ -16,8 +19,9 @@ from PIL import Image, ImageDraw, ImageFont, ExifTags
 Image.MAX_IMAGE_PIXELS = 300000000
 
 # Versioning
-__version__ = "2.2.0"
-# pyinstaller --onefile --icon=metadata.ico --name MetaData-V2.2.0 image_metadata_extractor.py
+__version__ = "2.3.0"
+# pyinstaller --onefile --icon=metadata.ico --name MetaData-V2.3.0 image_metadata_extractor.py
+# pyinstaller --onefile --icon=metadata.ico --name MetaData-V2.3.0 --add-data "exiftool-13.09_64/exiftool.exe;exiftool-13.09_64" --add-data "exiftool-13.09_64/exiftool_files;exiftool-13.09_64/exiftool_files" --paths "exiftool-13.09_64/exiftool_files" image_metadata_extractor.py
 
 script_dir = os.path.dirname(os.path.realpath(__file__))
 
@@ -26,8 +30,10 @@ def setup_logging():
     log_file = "metadata_extraction.log"
 
     if os.path.exists(log_file):
-        response = input(f"Log file '{log_file}' already exists. Delete it? (y/n): ")
-        if response.lower() == "y":
+        response = input(
+            f"Log file '{log_file}' already exists. Delete it? (y/n, default y): "
+        )
+        if response.lower() != "n":
             os.remove(log_file)
             print(f"Log file '{log_file}' deleted.")
         else:
@@ -46,6 +52,7 @@ def setup_logging():
 
 # Global Configuration
 METADATA_HEADER = f"MySmartPlans MetaData Tracker v{__version__}\n\n"
+EXIFTOOL_PATH = "./exiftool-13.09_64/exiftool"
 
 # File tracking
 METADATA_FORMAT = "xlsx"  # Choose (txt or xlsx)
@@ -90,8 +97,8 @@ def format_filesize_kb(filesize_bytes):
 
 
 def convert_gps_to_dms(coordinates, reference):
-    if coordinates is None:
-        return "GPS Data not found"
+    if coordinates is None or isinstance(coordinates, str):
+        return coordinates or "GPS Data not found"
 
     def calculate_dms(data):
         if isinstance(data, list):
@@ -108,45 +115,60 @@ def convert_gps_to_dms(coordinates, reference):
     return f"{degrees:.1f}° {minutes:.3f}' {seconds:.4f}\" {reference}"
 
 
+def process_heic(image_path, text, output_directory, overlay_position):
+    try:
+        # Register the HEIF opener with Pillow
+        pillow_heif.register_heif_opener()
+
+        # Pass the image to overlay_text for further processing and saving
+        overlay_text(
+            image_path=image_path,
+            text=text,
+            position=(10, 10),
+            output_directory=output_directory,
+            overlay_position=overlay_position,
+        )
+
+        logging.info(f"Successfully processed HEIC file: {image_path}")
+
+    except Exception as e:
+        logging.error(f"Error processing HEIC file: {image_path} - Error: {e}")
+
+
 def get_image_metadata(image_path):
     try:
-        with open(image_path, "rb") as file:
-            tags = process_file(file)
-        metadata = {
-            "GPS Latitude": tags.get("GPS GPSLatitude") or "",
-            "GPS Longitude": tags.get("GPS GPSLongitude") or "",
-            "Origin Date": (
-                parse_image_date(str(tags.get("EXIF DateTimeOriginal")))
-                if tags.get("EXIF DateTimeOriginal")
-                else ""
-            ),
-            "Offset Time": (
-                tags.get("EXIF OffsetTime") if tags.get("EXIF OffsetTime") else ""
-            ),
-            "Orientation": tags.get("Image Orientation") or "",
-            "Make": (
-                str(tags.get("Image Make").printable).strip()
-                if tags.get("Image Make")
-                else ""
-            ),
-            "Model": (
-                str(tags.get("Image Model").printable).strip()
-                if tags.get("Image Model")
-                else ""
-            ),
-            "Image Width": (
-                tags.get("EXIF ExifImageWidth")
-                if tags.get("EXIF ExifImageWidth")
-                else ""
-            ),
-            "Image Height": (
-                tags.get("EXIF ExifImageLength")
-                if tags.get("EXIF ExifImageLength")
-                else ""
-            ),
-            "Megapixels": tags.get("Megapixels") if tags.get("Megapixels") else "",
+        # Construct the ExifTool command with the updated path
+        # command = [EXIFTOOL_PATH, "-j", image_path]  # -j for JSON output
+
+        exiftool_path = os.path.join(sys._MEIPASS, "exiftool-13.09_64", "exiftool.exe")
+        command = [exiftool_path, "-j", image_path]
+
+        # Execute the command and capture the output
+        process = subprocess.run(command, capture_output=True, text=True)
+
+        # Check if there's any output from ExifTool
+        if not process.stdout:
+            raise ValueError("No output from ExifTool")
+
+        # Parse the JSON output
+        metadata = json.loads(process.stdout)[0]
+
+        # Format the metadata (adjust as needed based on ExifTool's output)
+        formatted_metadata = {
+            "GPS Latitude": metadata.get("GPSLatitude", ""),
+            "GPS Longitude": metadata.get("GPSLongitude", ""),
+            "Origin Date": parse_image_date(metadata.get("DateTimeOriginal", "")),
+            "Offset Time": metadata.get("OffsetTime", ""),
+            "Orientation": metadata.get("Orientation", ""),
+            "Make": metadata.get("Make", ""),
+            "Model": metadata.get("Model", ""),
+            "Image Width": metadata.get("ImageWidth", ""),
+            "Image Height": metadata.get("ImageHeight", ""),
+            "Megapixels": metadata.get("Megapixels", ""),  # Now directly available
         }
-        return metadata, tags
+
+        return formatted_metadata, metadata  # Return both formatted and raw metadata
+
     except Exception as e:
         print(f"Error processing image: {image_path} - Error: {e}")
         return {}
@@ -254,13 +276,16 @@ def write_metadata(metadata, output_path):
             sheet.cell(row, 11).value = str(file_info["metadata"].get("GPS Longitude"))
             image_width = file_info["metadata"].get("Image Width")
             if image_width:
-                sheet.cell(row, 12).value = int(image_width.printable)
+                # sheet.cell(row, 12).value = int(image_width.printable)
+                sheet.cell(row, 12).value = int(str(image_width))
             image_height = file_info["metadata"].get("Image Height")
             if image_height:
-                sheet.cell(row, 13).value = int(image_height.printable)
+                # sheet.cell(row, 13).value = int(image_height.printable)
+                sheet.cell(row, 13).value = int(str(image_height))
             megapixels = file_info["metadata"].get("Megapixels")
             if megapixels:
-                sheet.cell(row, 14).value = float(megapixels.printable)
+                # sheet.cell(row, 14).value = float(megapixels.printable)
+                sheet.cell(row, 14).value = float(str(megapixels))
 
         wb.save(output_path)
         for column_cells in sheet.columns:
@@ -276,28 +301,32 @@ def write_metadata(metadata, output_path):
 def open_image_without_orientation(image_path):
     try:
         img = Image.open(image_path)
-        exif = img.getexif()
-        orientation = 1
-        for orientation in ExifTags.TAGS.keys():
-            if ExifTags.TAGS[orientation] == "Orientation":
-                break
 
-        if exif[orientation] == 2:  # Horizontal flip
-            img = img.transpose(Image.FLIP_LEFT_RIGHT)
-        elif exif[orientation] == 3:  # 180 degree rotation
-            img = img.transpose(Image.ROTATE_180)
-        elif exif[orientation] == 4:  # Vertical flip
-            img = img.transpose(Image.FLIP_TOP_BOTTOM)
-        elif exif[orientation] == 5:  # Transpose (90 degree rotation + flip)
-            img = img.transpose(Image.TRANSPOSE)
-        elif exif[orientation] == 6:  # 90 degree rotation
-            img = img.transpose(Image.ROTATE_270)
-        elif exif[orientation] == 7:  # Transpose (270 degree rotation + flip)
-            img = img.transpose(Image.TRANSVERSE)
-        elif exif[orientation] == 8:  # 270 degree rotation
-            img = img.transpose(Image.ROTATE_90)
+        # Skip orientation check for HEIC files
+        if not image_path.lower().endswith(".heic"):
+            exif = img.getexif()
+            orientation = 1
+            for orientation in ExifTags.TAGS.keys():
+                if ExifTags.TAGS[orientation] == "Orientation":
+                    break
+
+            if exif[orientation] == 2:  # Horizontal flip
+                img = img.transpose(Image.FLIP_LEFT_RIGHT)
+            elif exif[orientation] == 3:  # 180 degree rotation
+                img = img.transpose(Image.ROTATE_180)
+            elif exif[orientation] == 4:  # Vertical flip
+                img = img.transpose(Image.FLIP_TOP_BOTTOM)
+            elif exif[orientation] == 5:  # Transpose (90 degree rotation + flip)
+                img = img.transpose(Image.TRANSPOSE)
+            elif exif[orientation] == 6:  # 90 degree rotation
+                img = img.transpose(Image.ROTATE_270)
+            elif exif[orientation] == 7:  # Transpose (270 degree rotation + flip)
+                img = img.transpose(Image.TRANSVERSE)
+            elif exif[orientation] == 8:  # 270 degree rotation
+                img = img.transpose(Image.ROTATE_90)
 
         return img
+
     except (KeyError, AttributeError, OSError):
         # exif data missing or image corrupt
         print(f"Image file might be corrupt or missing EXIF data: {image_path}")
@@ -398,23 +427,34 @@ def overlay_text(
     new_name = os.path.splitext(filename)[0] + "_MD.png"
     output_path = os.path.join(date_folder_path, new_name)
     img.save(output_path)
+    # time.sleep(2)
+    os.remove(image_path)
 
 
 def check_and_clear_directory(directory):
     if os.path.exists(directory):
         if os.listdir(directory):  # Check if the directory is not empty
             response = input(
-                f"Directory {directory} is not empty. Delete all contents? (y/n): "
+                f"Directory {directory} is not empty. Delete all contents? (y/n, default y): "
             )
-            if response.lower() == "y":
+            if response.lower() != "n":
                 # Clear the directory
                 for filename in os.listdir(directory):
                     file_path = os.path.join(directory, filename)
-                    if os.path.isfile(file_path) or os.path.islink(file_path):
-                        os.unlink(file_path)
-                    elif os.path.isdir(file_path):
-                        shutil.rmtree(file_path)
-                logging.info(f"All contents of {directory} have been deleted.")
+                    try:
+                        if os.path.isfile(file_path) or os.path.islink(file_path):
+                            os.unlink(file_path)
+                        elif os.path.isdir(file_path):
+                            shutil.rmtree(file_path)
+                        logging.info(f"All contents of {directory} have been deleted.")
+                    except PermissionError:
+                        logging.warning(
+                            f"Could not delete file {file_path} because it is being used by another process."
+                        )
+                        print(
+                            f"\nError: Could not delete {file_path}. Please ensure the file is closed and not being used by any other program.\n"
+                        )
+                        input("Press Enter to continue...")
             else:
                 logging.error("Operation aborted by the user.")
                 return False
@@ -467,11 +507,12 @@ def main():
         logging.error(f"Input directory does not exist: {input_directory}")
         return
 
-        # Check if there are any JPEG images in the directory
+    # Check if there are any Image files in the directory
     if not any(
-        file.lower().endswith((".jpg", ".jpeg")) for file in os.listdir(input_directory)
+        file.lower().endswith((".jpg", ".jpeg", ".png", ".heic"))
+        for file in os.listdir(input_directory)
     ):
-        logging.error("No JPEG images found in the input directory.")
+        logging.error("No Images found in the input directory.")
         return
 
     # Create directory if not exist
@@ -480,7 +521,7 @@ def main():
 
     has_errors = False
 
-    directory_metadata = {"files": []}  # List for storing file-level metadata
+    directory_metadata = {"files": []}
 
     for root, dirs, files in os.walk(input_directory):
         for filename in files:
@@ -488,24 +529,23 @@ def main():
             try:
                 logging.info(f"Processing file: {filename}")
 
+                # Exclude temporary JPEG files from processing
                 if filepath.lower().endswith(
-                    (".jpg", ".jpeg", ".png")
-                ) and not filepath.endswith(("_MD.png", "_MD.txt")):
+                    (".jpg", ".jpeg", ".png", ".heic")
+                ) and not filepath.endswith(("_MD.png", "_MD.txt", "_temp.jpg")):
                     formatted_metadata, raw_metadata = get_image_metadata(filepath)
 
-                    if WRITE_RAW_METADATA:  # Conditionally write raw data
+                    if WRITE_RAW_METADATA:
                         output_filename = (
                             os.path.splitext(filename)[0] + "_metadata.txt"
                         )
                         output_path = os.path.join(output_directory, output_filename)
                         write_raw_metadata(raw_metadata, output_path)
 
-                    # Get file information
                     file_stats = os.stat(filepath)
                     file_size = file_stats.st_size
-                    file_type = os.path.splitext(filename)[1]  # Get extension
+                    file_type = os.path.splitext(filename)[1]
 
-                    # Add file info to the metadata
                     directory_metadata["files"].append(
                         {
                             "filename": filename,
@@ -555,21 +595,29 @@ def main():
                                 overlay_text_content += f"Megapixel: {value}\n"
 
                     logging.info(f"Processed file: {filename}")
-                    overlay_text(
-                        filepath,
-                        overlay_text_content,
-                        (10, 10),
-                        output_directory,
-                        overlay_position,
-                    )
 
-                    # Remove the file from the input directory after processing
-                    os.remove(filepath)
+                    # Use process_heic for HEIC files, overlay_text for others
+                    if filepath.lower().endswith(".heic"):
+                        process_heic(
+                            filepath,
+                            overlay_text_content,
+                            output_directory,
+                            overlay_position,
+                        )
+                    else:
+                        overlay_text(
+                            filepath,
+                            overlay_text_content,
+                            (10, 10),
+                            output_directory,
+                            overlay_position,
+                        )
+                        logging.info(f"Successfully processed Image file: {filepath}")
 
             except Exception as e:
+                # Moves files to IMAGES_ERROR
+                # Use copy to avoid deleting test files
                 error_file_path = os.path.join(error_directory, filename)
-
-                # For testing use copy to avoid deleting test files
                 os.rename(filepath, error_file_path)
                 # shutil.copy(filepath, error_file_path)
 
@@ -577,7 +625,6 @@ def main():
                 print(f"An error occurred: {e}")
                 print(f"Check the error output folder: {error_directory}")
                 input("Press Enter to acknowledge and continue...")
-
                 has_errors = True
 
         # Handle metadata file creation
@@ -593,7 +640,7 @@ def main():
         )
 
     # Testing only
-    # input("Press Enter to close this window...")
+    input("Press Enter to close this window...")
 
 
 if __name__ == "__main__":
